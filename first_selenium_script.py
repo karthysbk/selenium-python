@@ -20,9 +20,17 @@ search_box.send_keys("Instagram")
 # Simulate hitting the Enter key
 search_box.send_keys(Keys.RETURN)
 
-
 # Print the title of the current webpage
 print("Page Title is: ", driver.title)
+# Locate the link that contains "instagram.com" in the URL
+try:
+    # This XPath searches for any anchor (<a>) element containing "instagram.com" in its href attribute
+    target_link = driver.find_element(By.XPATH, "//a[contains(@href, 'instagram.com')]")
+    target_link.click()
+    print("Successfully clicked on the target link.")
+except:
+    print("Target link not found in the search results.")
 
 # Close the browser
 driver.quit()
+#changes
