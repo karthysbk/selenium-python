@@ -10,14 +10,14 @@ import chromedriver_autoinstaller
 
 @pytest.fixture(scope="function")
 def driver():
-    chromedriver_autoinstaller.install()  # Automatically installs ChromeDriver
-
-    # Set Chrome options to use a fresh profile and avoid session issues
+    # Install and setup ChromeDriver automatically
+    chromedriver_autoinstaller.install()
+    
     chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_argument("--no-sandbox")  # Required for GitHub Actions
-    chrome_options.add_argument("--disable-dev-shm-usage")  # Fixes crashes in some environments
-    chrome_options.add_argument("--headless")  # Runs in headless mode (no UI)
-    chrome_options.add_argument(f"--user-data-dir=/tmp/chrome-user-{os.getpid()}")  # Unique profile
+    chrome_options.add_argument("--no-sandbox")  
+    chrome_options.add_argument("--disable-dev-shm-usage")  
+    chrome_options.add_argument("--headless")  
+    chrome_options.add_argument(f"--user-data-dir=/tmp/chrome-user-{os.getpid()}")  
 
     driver = webdriver.Chrome(options=chrome_options)
     yield driver
@@ -26,17 +26,14 @@ def driver():
 def test_google_search(driver):
     driver.get("https://www.google.com")
 
-    # Wait for search box to appear
-    search_box = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.NAME, "q"))
-    )
+    # Wait for the search box to be present
+    wait = WebDriverWait(driver, 10)  
+    search_box = wait.until(EC.presence_of_element_located((By.NAME, "q")))
+    
     search_box.send_keys("Selenium with PyTest")
     search_box.send_keys(Keys.RETURN)
 
-    # ✅ Wait until search results load
-    WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR, "h3"))
-    )
+    # Wait for search results to load
+    results = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "h3")))
 
-    results = driver.find_elements(By.CSS_SELECTOR, "h3")
     assert len(results) > 0, "No search results found!"
