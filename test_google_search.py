@@ -7,18 +7,18 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import chromedriver_autoinstaller
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def driver():
-    # Ensure ChromeDriver is installed
-    chromedriver_autoinstaller.install()
+    chromedriver_autoinstaller.install()  # Automatically installs ChromeDriver
 
-    # Set up Chrome options
-    options = webdriver.ChromeOptions()
-    options.add_argument("start-maximized")
-    options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36")
+    # Set Chrome options to use a fresh profile and avoid session issues
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument("--no-sandbox")  # Required for GitHub Actions
+    chrome_options.add_argument("--disable-dev-shm-usage")  # Fixes crashes in some environments
+    chrome_options.add_argument("--headless")  # Runs in headless mode (no UI)
+    chrome_options.add_argument(f"--user-data-dir=/tmp/chrome-user-{os.getpid()}")  # Unique profile
 
-    # Start WebDriver
-    driver = webdriver.Chrome(options=options)
+    driver = webdriver.Chrome(options=chrome_options)
     yield driver
     driver.quit()
 
